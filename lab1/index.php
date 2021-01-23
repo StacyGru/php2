@@ -16,24 +16,22 @@
 
         session_start();    // подключаем механизм сессий
 
-        if (!isset($_SESSION['user']) && isset($_POST['login' ]))  // ЕСЛИ ПЕРЕДАНЫ ДАННЫЕ ДЛЯ ВХОДА
+        if (!isset($_SESSION['user']) && isset($_POST['login']) && isset($_POST['password']) && $auth = fopen('users.csv', 'rt'))  // ЕСЛИ ПЕРЕДАНЫ ДАННЫЕ ДЛЯ ВХОДА и удалось открыть csv файл
         {   // попытка входа
-            if ($auth = fopen('users.csv', 'rt'))  // если удалось открыть csv файл
+            while (!feof($auth))    // пока не достигнут конец файла, повторяем:
             {
-                while (!feof($auth))    // пока не достигнут конец файла, повторяем:
+                $test_user = explode(',', fgets($auth)); // читаем строку и развбиваем в массив
+                if (trim($test_user[0])==$_POST['login'])   // если 1 элемент массива совпадает с введённым логином (trim - удаляет пробелы)
                 {
-                    $test_user = explode(',' fgets($auth)); // читаем строку и развбиваем в массив
-                    if (trim($test_user[0])==$_POST['login'])   // если 1 элемент массива совпадает с введённым логином (trim - удаляет пробелы)
+                    if (isset($test_user[1]) && trim($test_user[1])==$_POST['password'])    // а 2 элемент с введённым паролем
                     {
-                        if (isset($test_user[1]) && trim($test_user[1])==$_POST['password'])    // а 2 элемент с введённым паролем
-                        {
-                            $_SESSION['user'] = $test_user; // пользователь найден, сохраняем данные
-                        }
-                        break;  // досрочно завершаем цикл
+                        $_SESSION['user'] = $test_user; // пользователь найден, сохраняем данные
                     }
+                    header('Location: /'); // перенаправление на главную страницу сайта
+                    exit(); // завершаем работу скрипта
                 }
-                fclose($auth);  // закрываем файл
             }
+            fclose($auth);  // закрываем файл
         }
 
         if(!isset($_SESSION['user']))   // ЕСЛИ ВХОД ЕЩЁ НЕ ПРОИЗОШЁЛ
@@ -46,7 +44,7 @@
         }
         else    // ЕСЛИ ВХОД УСПЕШНО ВЫПОЛНЕН
         {
-            echo '<p>Добро пожаловать, '.$_SESSION['user']['name'].'!</p>';
+            echo '<p>Добро пожаловать, '.$_SESSION['user'].'!</p>';
             include 'tree.php';
         }
     ?>
