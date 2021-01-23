@@ -16,6 +16,30 @@
 
         session_start();    // подключаем механизм сессий
 
+        if (!isset($_SESSION['user']) && isset($_POST['login' ]))  // ЕСЛИ ПЕРЕДАНЫ ДАННЫЕ ДЛЯ ВХОДА
+        {
+            $auth = fopen('users.csv', 'rt'); // открываем csv файл
+            if ($auth)  // если удалось открыть
+            {
+                while (!feof($auth))    // пока не достигнут конец файла, повторяем:
+                {
+                    $str = fgets($auth);    // читаем строку
+                    $test_user = explode(',' $str); // разбиваем строку в массив
+                    if (trim($test_user[0])==$_POST['login'])   // если 1 элемент массива совпадает с введённым логином (trim - удаляет пробелы)
+                    {
+                        if (trim($test_user[1])==$_POST['password'])    // а 2 элемент с введённым паролем
+                        {
+                            $user = $test_user; // пользователь найден и прошёл аутентификацию
+                        }
+                        break;  // досрочно завершаем цикл
+                    }
+                }
+                fclose($auth);  // закрываем файл
+            }
+            if (isset($user))   // если пользователь найден
+                $_SESSION['user'] = $user;  // сохраняем данные о пользователе
+        }
+
         if(!isset($_SESSION['user']))   // ЕСЛИ ВХОД ЕЩЁ НЕ ПРОИЗОШЁЛ
         {
             echo '<form name="auth" method="post" action="">
@@ -27,15 +51,8 @@
         else    // ЕСЛИ ВХОД УСПЕШНО ВЫПОЛНЕН
         {
             echo '<p>Добро пожаловать, '.$_SESSION['user']['name'].'!</p>';
+            include 'tree.php';
         }
-
-        if (!isset($_SESSION['user']) && isset($_POST['login' ]))  // ЕСЛИ ПЕРЕДАНЫ ДАННЫЕ ДЛЯ ВХОДА
-        {
-            ... // попытка входа
-            if (/*результат успешен*/)
-                $_SESSION['user'] = $user;  // сохраняем данные о пользователе
-        }
-
     ?>
         </body>
     </html>
