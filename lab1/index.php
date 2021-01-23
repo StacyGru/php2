@@ -17,27 +17,23 @@
         session_start();    // подключаем механизм сессий
 
         if (!isset($_SESSION['user']) && isset($_POST['login' ]))  // ЕСЛИ ПЕРЕДАНЫ ДАННЫЕ ДЛЯ ВХОДА
-        {
-            $auth = fopen('users.csv', 'rt'); // открываем csv файл
-            if ($auth)  // если удалось открыть
+        {   // попытка входа
+            if ($auth = fopen('users.csv', 'rt'))  // если удалось открыть csv файл
             {
                 while (!feof($auth))    // пока не достигнут конец файла, повторяем:
                 {
-                    $str = fgets($auth);    // читаем строку
-                    $test_user = explode(',' $str); // разбиваем строку в массив
+                    $test_user = explode(',' fgets($auth)); // читаем строку и развбиваем в массив
                     if (trim($test_user[0])==$_POST['login'])   // если 1 элемент массива совпадает с введённым логином (trim - удаляет пробелы)
                     {
-                        if (trim($test_user[1])==$_POST['password'])    // а 2 элемент с введённым паролем
+                        if (isset($test_user[1]) && trim($test_user[1])==$_POST['password'])    // а 2 элемент с введённым паролем
                         {
-                            $user = $test_user; // пользователь найден и прошёл аутентификацию
+                            $_SESSION['user'] = $test_user; // пользователь найден, сохраняем данные
                         }
                         break;  // досрочно завершаем цикл
                     }
                 }
                 fclose($auth);  // закрываем файл
             }
-            if (isset($user))   // если пользователь найден
-                $_SESSION['user'] = $user;  // сохраняем данные о пользователе
         }
 
         if(!isset($_SESSION['user']))   // ЕСЛИ ВХОД ЕЩЁ НЕ ПРОИЗОШЁЛ
