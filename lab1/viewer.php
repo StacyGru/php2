@@ -1,4 +1,10 @@
 <?php
+    function makeLink($name, $path)
+    {
+        $link = 'viewer.php?filename='.$path.'/'.$name; // формируем адрес ссылки
+        echo '<a href="'.$link'">Файл '.$name.'</a>';   // выводим ссылку
+    }
+    
     function outdirInfo($name, $path)   // передаём имя каталога и путь к нему
     {
         echo '<div>';   // начало блока
