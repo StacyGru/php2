@@ -69,6 +69,23 @@
             closedir($dir);
         }
     }
+
+    function updateFileList($filename)
+    {
+        $info = file($filename);    // читаем все строки файла в массив
+        $f = fopen($filename, 'wt'); // открываем файл для записи
+        flock($f, LOCK_EX); // блокируем файл для чтения другими процессами
+
+        foreach ($info as $k => $user)  // для всех строк массива
+        {
+            $data = str_getcsv($user, ';'); // декодируем данные
+            if ($data[0] == $_SESSION['login'])   // если пользователь найден
+                $user .= ';'.$filename;   // добавляем к его файлам новый
+            fputs($f, $user);   // сохраняем данные в файл
+        }
+        fputs($f, LOCK_UN); // снимаем блокировку
+        fclose($f); // закрываем файл
+    }
     
     if (isset($_FILES['myfilename']))   // если файл был выбран
     {
@@ -79,6 +96,7 @@
                 move_uploaded_file($_FILES['myfilename']['tmp_name'],   //загружаем (копируем) файл
                     makeName($_FILES['myfilename']['name']));
                 echo 'Файл '.$_FILES['myfilename']['name'].' загружен на сервер';
+                updateFileList(basename(__FILE__));
             }
             else
                 deleteCatalog($_POST['tmp_name']);  // удаляем каталог
