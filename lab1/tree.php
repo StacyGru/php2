@@ -36,9 +36,14 @@
     {
         if (isset($_FILES['myfilename']['dir-name']))   // и имя было указано
         {
-            move_uploaded_file($_FILES['myfilename']['dir-name'],   //загружаем файл
-                makeName($_FILES['myfilename']['name']));
-            echo 'Файл '.$_fILES['myfilename']['name'].' загружен на сервер';
+            if ($_FILES['myfilename']['dir-name'])  // если файл существует
+            {
+                move_uploaded_file($_FILES['myfilename']['dir-name'],   //загружаем (копируем) файл
+                    makeName($_FILES['myfilename']['name']));
+                echo 'Файл '.$_fILES['myfilename']['name'].' загружен на сервер';
+            }
+            else
+                rmdir($_POST['dir-name']);  // удаляем каталог (только если он пустой)
         }
     }
 
