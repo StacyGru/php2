@@ -1,15 +1,26 @@
 <?php
+    echo "<link rel='stylesheet' href='style.css'>";
+
+    if (session_status() != 2)
+        session_start();
+    
+    if (!isset($_SESSION['login']))
+    {
+        echo 'Необходима авторизация';
+        exit;
+    }
+
     function makeLink($name, $path)
     {
         $link = 'viewer.php?filename='.$path.'/'.$name; // формируем адрес ссылки
-        echo '<a href=".viewer.php?filename='.UrlEncode($path). // во избежание трактовки некоторых символов как элементов URL
-            '/'.$name.'" target = "_blank">Файл '.$name.'</a><br>';   // выводим ссылку
+        echo '<a href="viewer.php?filename='.UrlEncode($path). // во избежание трактовки некоторых символов как элементов URL
+            '/'.$name.'" target="_blank">Файл "'.$name.'"</a><br>';   // выводим ссылку
     }
     
     function outdirInfo($name, $path)   // передаём имя каталога и путь к нему
     {
         echo '<div>';   // начало блока
-        echo 'Каталог '.$name.'<br>';   // выводим имя каталога
+        echo '<b>Каталог "'.$name.'"</b><br>';   // выводим имя каталога
         // echo $path;
         // echo count(scandir($path));
          
