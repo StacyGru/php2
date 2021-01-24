@@ -32,14 +32,23 @@
 
     }
     
-    // if (/*необходимо изменить данные*/)
-    // {
-    //     ... // загружаем файл и изменяем данные
-    // }
+    if (isset($_FILES['myfilename']))   // если файл был выбран
+    {
+        if (isset($_FILES['myfilename']['dir-name']))   // и имя было указано
+        {
+            move_uploaded_file($_FILES['myfilename']['dir-name'],   //загружаем файл
+                makeName($_FILES['myfilename']['name']));
+            echo 'Файл '.$_fILES['myfilename']['name'].' загружен на сервер';
+        }
+    }
 
     echo '<div id="dir_tree">'; // отображаем содержимое каталога
     outdirInfo(basename(__DIR__), getcwd());
     echo '</div>';
 
-    // ... // выводим форму для загрузки файлов
+    echo '<br><form method="post" enctype="multipart/form-data" action="/tree.php">
+    <label for="dir-name">Каталог на сервере</label> <input type="text" name="dir-name" id="dir-name"><br>
+    <label for="myfilename">Локальный файл</label> <input type="file" name="filename"><br>
+    <input type="submit" value="Отправить файл на сервер">
+    '; // выводим форму для загрузки файлов
 ?>
