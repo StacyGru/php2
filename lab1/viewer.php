@@ -12,7 +12,7 @@
         $content = '';
         while (!feof($f))
             $content .= fgets($f);
-        echo $content;
+        echo htmlentities($content);
         fclose($f);
     }
     else

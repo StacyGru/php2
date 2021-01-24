@@ -12,7 +12,7 @@
 
     function makeLink($name, $path)
     {
-        echo '<a href="viewer.php?filename='.UrlEncode($path). // во избежание трактовки некоторых символов как элементов URL
+        echo '<a href="../viewer.php?filename='.UrlEncode($path). // во избежание трактовки некоторых символов как элементов URL
             '/'.$name.'" target="_blank">Файл "'.$name.'"</a><br>';   // выводим ссылку
     }
     
