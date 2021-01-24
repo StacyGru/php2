@@ -12,7 +12,6 @@
 
     function makeLink($name, $path)
     {
-        $link = 'viewer.php?filename='.$path.'/'.$name; // формируем адрес ссылки
         echo '<a href="viewer.php?filename='.UrlEncode($path). // во избежание трактовки некоторых символов как элементов URL
             '/'.$name.'" target="_blank">Файл "'.$name.'"</a><br>';   // выводим ссылку
     }
@@ -62,15 +61,19 @@
 
     function deleteCatalog($name, $path)   // функция для удаления всех файлов внутри каталога
     {
+        $path_array = scandir($path);
         $dir = opendir($path);
         $count_file = 0;
-        while ((($file = readdir($dir)) != false) && ($count_file < count(scandir($path))))   // пока элементы каталога не кончились
+        echo $path;
+        
+        while ((($file = readdir($dir)) != false) && ($count_file < count($path_array)))   // пока элементы каталога не кончились
         {
             $count_file++;
             if (is_dir($path.'/'.$file) && $file != '.' && $file != '..') // если элемент каталог
                 deleteCatalog($file, $path.'/'.$file);   // повторно вызываем фуннкцию
             else if (is_file($path.'/'.$file))   // если элемент файл
                 unlink(dirname(__FILE__).'/'.$name.'/'.$file); // удаляем его
+            rmdir($path);
         }
             closedir($dir);
     }
