@@ -45,6 +45,7 @@
         $n = 1;
         while (file_exists($_POST['dir_name'].'/'.$n.'.'.$ext))
             $n++;
+        updateFileList($_POST['dir_name'].'/'.$n.'.'.$ext);    
         return($_POST['dir_name'].'/'.$n.'.'.$ext);
     }
 
@@ -72,10 +73,9 @@
 
     function updateFileList($filename)
     {
-        $info = file($filename);    // читаем все строки файла в массив
-        $f = fopen($filename, 'wt'); // открываем файл для записи
-        flock($f, LOCK_EX); // блокируем файл для чтения другими процессами
-
+        $info = file('users.csv');    // читаем все строки файла в массив
+        $f = fopen('users.csv', 'wt'); // открываем файл для записи
+        flock($f, LOCK_EX); // блокируем файл для чтения другими процессами 
         foreach ($info as $k => $user)  // для всех строк массива
         {
             $data = str_getcsv($user, ';'); // декодируем данные
@@ -83,7 +83,7 @@
                 $user .= ';'.$filename;   // добавляем к его файлам новый
             fputs($f, $user);   // сохраняем данные в файл
         }
-        fputs($f, LOCK_UN); // снимаем блокировку
+        flock($f, LOCK_UN); // снимаем блокировку
         fclose($f); // закрываем файл
     }
     
@@ -95,8 +95,8 @@
             {
                 move_uploaded_file($_FILES['myfilename']['tmp_name'],   //загружаем (копируем) файл
                     makeName($_FILES['myfilename']['name']));
+                   
                 echo 'Файл '.$_FILES['myfilename']['name'].' загружен на сервер';
-                updateFileList(basename(__FILE__));
             }
             else
                 deleteCatalog($_POST['tmp_name']);  // удаляем каталог
