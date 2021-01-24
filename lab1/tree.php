@@ -60,26 +60,19 @@
         return($_POST['dir_name'].'/'.$n.'.'.$ext);
     }
 
-    function deleteCatalog($dir_name)   // функция для удаления всех файлов внутри каталога
+    function deleteCatalog($name, $path)   // функция для удаления всех файлов внутри каталога
     {
-        if (count(scandir($dir_name)) == 0)
-            rmdir($dir_name);
-        else
+        $dir = opendir($path);
+        $count_file = 0;
+        while ((($file = readdir($dir)) != false) && ($count_file < count(scandir($path))))   // пока элементы каталога не кончились
         {
-            // $dir_name как $path
-            $dir = opendir($dir_name);
-            $path = getcwd($dir_name);
-            $count_file = 0;
-            while ((($file = readdir($dir)) != false) && ($count_file < count(scandir($path))))   // пока элементы каталога не кончились
-            {
-                $count_file++;
-                if (is_dir($path.'/'.$file) && $file != '.' && $file != '..') // если элемент каталог
-                    deleteCatalog($file);   // повторно вызываем фуннкцию
-                else if (is_file($path.'/'.$file))   // если элемент файл
-                    rmdir($file); // удаляем его
-            }
-            closedir($dir);
+            $count_file++;
+            if (is_dir($path.'/'.$file) && $file != '.' && $file != '..') // если элемент каталог
+                deleteCatalog($file, $path.'/'.$file);   // повторно вызываем фуннкцию
+            else if (is_file($path.'/'.$file))   // если элемент файл
+                unlink(dirname(__FILE__).'/'.$name.'/'.$file); // удаляем его
         }
+            closedir($dir);
     }
 
     function updateFileList($filename)
@@ -97,22 +90,27 @@
         flock($f, LOCK_UN); // снимаем блокировку
         fclose($f); // закрываем файл
     }
-    
-    if (isset($_FILES['myfilename']))   // если файл был выбран
+
+    // if ((isset($_POST['dir_name'])) && (!isset($_FILES['myfilename'])))    
+        
+
+    if (isset($_FILES['myfilename']['tmp_name']))   //  если файл был выбран и имя было указано
     {
-        if (isset($_FILES['myfilename']['tmp_name']))   // и имя было указано
+        if ($_FILES['myfilename']['tmp_name'])  // если файл существует
         {
-            if ($_FILES['myfilename']['tmp_name'])  // если файл существует
-            {
-                move_uploaded_file($_FILES['myfilename']['tmp_name'],   //загружаем (копируем) файл
-                    makeName($_FILES['myfilename']['name']));
-                   
-                echo 'Файл '.$_FILES['myfilename']['name'].' загружен на сервер';
-            }
-            else
-                deleteCatalog($_POST['tmp_name']);  // удаляем каталог
+            move_uploaded_file($_FILES['myfilename']['tmp_name'],   //загружаем (копируем) файл
+                makeName($_FILES['myfilename']['name']));
+                
+            echo 'Файл '.$_FILES['myfilename']['name'].' загружен на сервер<br><br>';
         }
+        else
+            deleteCatalog($_POST['dir_name'], realpath($_POST['dir_name']));  // удаляем каталог
     }
+
+    // if (isset($_FILES['tmp_name']) && (!isset($_FILES['myfilename'])))
+    // {
+    //     deleteCatalog($_POST['dir_name'], realpath($_POST['dir_name']));  // удаляем каталог
+    // }
 
     echo '<div id="dir_tree">'; // отображаем содержимое каталога
     outdirInfo(basename(__DIR__), getcwd());
