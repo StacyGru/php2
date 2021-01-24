@@ -59,23 +59,28 @@
         return($_POST['dir_name'].'/'.$n.'.'.$ext);
     }
 
-    function deleteCatalog($name, $path)   // функция для удаления всех файлов внутри каталога
+    function deleteCatalog($dir)   // функция для удаления всех файлов внутри каталога
     {
-        $path_array = scandir($path);
-        $dir = opendir($path);
-        $count_file = 0;
-        echo $path;
-        
-        while ((($file = readdir($dir)) != false) && ($count_file < count($path_array)))   // пока элементы каталога не кончились
-        {
-            $count_file++;
-            if (is_dir($path.'/'.$file) && $file != '.' && $file != '..') // если элемент каталог
-                deleteCatalog($file, $path.'/'.$file);   // повторно вызываем фуннкцию
-            else if (is_file($path.'/'.$file))   // если элемент файл
-                unlink(dirname(__FILE__).'/'.$name.'/'.$file); // удаляем его
-            rmdir($path);
+        if (!file_exists($dir)) {
+            return true;
         }
-            closedir($dir);
+    
+        if (!is_dir($dir)) {
+            return unlink($dir);
+        }
+    
+        foreach (scandir($dir) as $item) {
+            if ($item == '.' || $item == '..') {
+                continue;
+            }
+    
+            if (!deleteCatalog($dir.'/'.$item)) {
+                return false;
+            }
+    
+        }
+    
+        return rmdir($dir);
     }
 
     function updateFileList($filename)
@@ -107,7 +112,7 @@
             echo 'Файл '.$_FILES['myfilename']['name'].' загружен на сервер<br><br>';
         }
         else
-            deleteCatalog($_POST['dir_name'], realpath($_POST['dir_name']));  // удаляем каталог
+            deleteCatalog(realpath($_POST['dir_name']));  // удаляем каталог
     }
 
     // if (isset($_FILES['tmp_name']) && (!isset($_FILES['myfilename'])))
