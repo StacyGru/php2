@@ -31,19 +31,57 @@
         echo '</div>';  // конец блока
 
     }
+
+    function makeName($filename)
+    {
+        if (!file_exists($_POST['dir_name']))
+        {
+            umask(0);
+            mkdir($_POST['dir_name'], 0777, true);
+        }
+        $tmp = explode('.', $filename);
+        $ext = end($tmp);
+
+        $n = 1;
+        while (file_exists($_POST['dir_name'].'/'.$n.'.'.$ext))
+            $n++;
+        return($_POST['dir_name'].'/'.$n.'.'.$ext);
+    }
+
+    function deleteCatalog($dir_name)   // функция для удаления всех файлов внутри каталога
+    {
+        if (count(scandir($dir_name)) == 0)
+            rmdir($dir_name);
+        else
+        {
+            // $dir_name как $path
+            $dir = opendir($dir_name);
+            $path = getcwd($dir_name);
+            $count_file = 0;
+            while ((($file = readdir($dir)) != false) && ($count_file < count(scandir($path))))   // пока элементы каталога не кончились
+            {
+                $count_file++;
+                if (is_dir($path.'/'.$file) && $file != '.' && $file != '..') // если элемент каталог
+                    deleteCatalog($file);   // повторно вызываем фуннкцию
+                else if (is_file($path.'/'.$file))   // если элемент файл
+                    rmdir($file); // удаляем его
+            }
+            closedir($dir);
+        }
+    }
     
     if (isset($_FILES['myfilename']))   // если файл был выбран
     {
-        if (isset($_FILES['myfilename']['dir-name']))   // и имя было указано
+        if (isset($_FILES['myfilename']['tmp_name']))   // и имя было указано
         {
-            if ($_FILES['myfilename']['dir-name'])  // если файл существует
+            if ($_FILES['myfilename']['tmp_name'])  // если файл существует
             {
-                move_uploaded_file($_FILES['myfilename']['dir-name'],   //загружаем (копируем) файл
+                move_uploaded_file($_FILES['myfilename']['tmp_name'],   //загружаем (копируем) файл
                     makeName($_FILES['myfilename']['name']));
-                echo 'Файл '.$_fILES['myfilename']['name'].' загружен на сервер';
+                echo 'Файл '.$_FILES['myfilename']['name'].' загружен на сервер';
             }
             else
-                rmdir($_POST['dir-name']);  // удаляем каталог (только если он пустой)
+                deleteCatalog($_POST['tmp_name']);  // удаляем каталог
         }
     }
 
@@ -51,9 +89,8 @@
     outdirInfo(basename(__DIR__), getcwd());
     echo '</div>';
 
-    echo '<br><form method="post" enctype="multipart/form-data" action="/tree.php">
-    <label for="dir-name">Каталог на сервере</label> <input type="text" name="dir-name" id="dir-name"><br>
-    <label for="myfilename">Локальный файл</label> <input type="file" name="filename"><br>
-    <input type="submit" value="Отправить файл на сервер">
-    '; // выводим форму для загрузки файлов
+    echo '<br><form method="post" enctype="multipart/form-data" action="">
+    <label for="dir_name">Каталог на сервере</label> <input type="text" name="dir_name" id="dir_name"><br>
+    <label for="myfilename">Локальный файл</label> <input type="file" name="myfilename"><br>
+    <input type="submit" value="Отправить файл на сервер">'; // выводим форму для загрузки файлов
 ?>
