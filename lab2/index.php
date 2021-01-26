@@ -16,11 +16,14 @@
 
         function getHTMLcode($url)
         {
-            $ret = '';  // начальное значение контента - пусто
-            $f = fopen($base, 'rt');    // открываем файл для записи
-            while (!feof()) // пока все строки не прочитаны
-                $ret .= fgets($f);  // записываем очередную строку в контент
-            fclose($f); // закрываем файл
+            $ch = curl_init($url);  // инициируем новый сеанс
+            curl_setopt($ch, CURLOPT_HEADER, 0);    // заголовки не передаём
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);    // возвратить содержимое файла (без выполнения кода)
+            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);    // разрешить перенаправление
+            curl_setopt($ch, CURLOPT_TIMEOUT, 10);  // тайм-аут 10 секунд
+            
+            $ret = curl_exec($ch);  //выполнение запроса
+            curl_close($ch);    // завершение сеанса
             return $ret;    // возвращаем содержание всего файла
         }
 
