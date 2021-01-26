@@ -65,17 +65,47 @@
                 else    // если ищем любой другой теш
                     $ret[$k] = array ('text' => $v[2]);   // возвращаем текст тега
             }
+            echoArray($ret);
             return $ret;    // возвращаем полученный массив
         }
 
-        $code = getHTMLcode($_POST['url']); // определяем html-код страницы
+        function echoArray($array)
+        {
+            for ($i=0; $i < count($array); $i++)
+            {
+                for ($j=0; $j < count($array[$i]); $j++)
+                echo $array[$i][$j];
+            }   
+        }
 
-        $titles = getALLtag($code, 'title');    // получаем массивы с соответствующими тегами
-        $descriptions = getALLtag($code, 'description');
-        $keywords = getALLtag($code, 'keywords');
-        $h1 = getALLtag($code, 'h1');
-        $h2 = getALLtag($code, 'h2');
-        $a = getALLtag($code, 'a');
+        if (!isset($_POST['url']))
+            echo '<form method="post" name="get_url" action="">
+                <label for="url">Введите ссылку:</label> <input type="text" name="url">
+                <input type="submit" value="Анализ">
+                </form>';
+        else
+        {
+            $code = getHTMLcode($_POST['url']); // определяем html-код страницы
+
+            // echo htmlentities($code);
+
+            $titles = getALLtag($code, 'title');    // получаем массивы с соответствующими тегами
+            $descriptions = getALLtag($code, 'description');
+            $keywords = getALLtag($code, 'keywords');
+            $h1 = getALLtag($code, 'h1');
+            $h2 = getALLtag($code, 'h2');
+            $a = getALLtag($code, 'a');
+
+            echo '<b>Результаты анализа</b><br><br>';
+            echoArray($a);
+
+            echo '<br><br><form method="post" name="go_back" action="">
+                <input type="submit" value="Обратно" name="go_back">
+                </form>';
+        }
+
+        if (isset($_POST['go_back']))
+            unset($_POST['url']);
     ?>
 
         </body>
