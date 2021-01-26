@@ -53,10 +53,29 @@
             */
             preg_match_all($pattern, $text, $ret, PREG_SET_ORDER);  // получаем массив со строками, где начиается текст внутри тегов
             foreach ($ret as $k => $v)
-                $ret[$k] = $v[2];   // записываем текст тегов ([2]) в массив
+            {
+                if ($tag == 'a')    // если искомый тег - <a>
+                {
+                    $href = '';
+                    preg_match('#(.*)href="(.*?)"#i', $v[1], $arr); // ищем в атрибутах тега адрес ссылки
+                    if ($arr)   // если успешно найдено
+                        $href = $arr[2];    // сохраняем адрес в переменной
+                    $ret[$k] = array('href' => $href, 'text' => $v[2]); // возвращаем адрес и текст ссылки
+                }
+                else    // если ищем любой другой теш
+                    $ret[$k] = array ('text' => $v[2]);   // возвращаем текст тега
+            }
             return $ret;    // возвращаем полученный массив
         }
 
+        $code = getHTMLcode($_POST['url']); // определяем html-код страницы
+
+        $titles = getALLtag($code, 'title');    // получаем массивы с соответствующими тегами
+        $descriptions = getALLtag($code, 'description');
+        $keywords = getALLtag($code, 'keywords');
+        $h1 = getALLtag($code, 'h1');
+        $h2 = getALLtag($code, 'h2');
+        $a = getALLtag($code, 'a');
     ?>
 
         </body>
