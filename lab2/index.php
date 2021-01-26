@@ -16,15 +16,27 @@
 
         function getHTMLcode($url)
         {
-            $ch = curl_init($url);  // инициируем новый сеанс
-            curl_setopt($ch, CURLOPT_HEADER, 0);    // заголовки не передаём
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);    // возвратить содержимое файла (без выполнения кода)
-            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);    // разрешить перенаправление
-            curl_setopt($ch, CURLOPT_TIMEOUT, 10);  // тайм-аут 10 секунд
+            try // ПОПЫТКА ИСПОЛЬЗОВАНИЯ CURL
+            {
+                if (!($ch = curl_init($url)))  // инициируем новый сеанс
+                    throw new Exception();  // если невохможно то генерируем исключительную ситуацию
+                    
+               
+                curl_setopt($ch, CURLOPT_HEADER, 0);    // заголовки не передаём
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);    // возвратить содержимое файла (без выполнения кода)
+                curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);    // разрешить перенаправление
+                curl_setopt($ch, CURLOPT_TIMEOUT, 10);  // тайм-аут 10 секунд
+                
+                $ret = curl_exec($ch);  //выполнение запроса
+                curl_close($ch);    // завершение сеанса
+                return $ret;    // возвращаем содержание всего файла
+            }
+            catch (Exception $e)    // ЕСЛИ ИСПОЛЬЗОВАТЬ CURL НЕ УДАЛОСЬ
+            {
+                return @file_get_contents($url);    // используем стандартную функцию
+                // @ -для блокировки вывода сообщений об ошибках
+            }
             
-            $ret = curl_exec($ch);  //выполнение запроса
-            curl_close($ch);    // завершение сеанса
-            return $ret;    // возвращаем содержание всего файла
         }
 
     ?>
